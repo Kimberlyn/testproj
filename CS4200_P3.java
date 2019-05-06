@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 public class CS4200_P3 
 {
@@ -10,12 +11,14 @@ public class CS4200_P3
 	public static boolean opponentTurn;
 	public static Scanner sc;
 	public static int moveCounter = 1;
-	public static String currentComputerPosition = "";
-	public static String currentOpponentPosition = "";
+	public static String currentComputerPosition = "A1";
+	public static String currentOpponentPosition = "H8";
+	public static List<place> emptyCells;
 
 	public static void main(String args[]) 
 	{
 		isoBoard = createBoard();
+		//System.out.print(alphaBeta(isoBoard));
 		System.out.println("\nIsolation: Begin Game\n Computer: X\n Opponent: O");
 		printBoard();
 		sc = new Scanner(System.in);
@@ -55,7 +58,6 @@ public class CS4200_P3
 	{
 		for (String path : usedSquares)
 		{
-
 			// COMPUTER HORIZONTAL
 			if (path.charAt(0) == potentialMove.charAt(0)) 
 			{
@@ -66,8 +68,8 @@ public class CS4200_P3
 					int potential=Integer.parseInt(String.valueOf(potentialMove.charAt(1))); 
 					int row = getNumericValue(path.charAt(0)); 
 					for(int i = potential; i < curr; i++) {
-						if (isoBoard[row][i] != '-') {
-							System.out.println("Computer west not valid");
+						if (isoBoard[row][i] == '#' || isoBoard[row][i] == 'O') {
+							//System.out.println("Computer west not valid");
 							return false;
 						}
 					}
@@ -77,17 +79,17 @@ public class CS4200_P3
 					int potential=Integer.parseInt(String.valueOf(potentialMove.charAt(1))); 
 					int row = getNumericValue(path.charAt(0)); 
 					for(int i = curr; i < potential; i++) {
-						if (isoBoard[row][i] != '-') {
-							System.out.println("Computer east not valid");
+						if (isoBoard[row][i] == '#' || isoBoard[row][i] == 'O') {
+							//System.out.println("Computer east not valid");
 							return false;
 						}
 					}
 					
 				}
-			}
+			} 
 
 			// COMPUTER VERTICAL
-			if (path.charAt(1) == potentialMove.charAt(1)) 
+			else if (path.charAt(1) == potentialMove.charAt(1)) 
 			{
 				// check to see if you're jumping north over a #
 				if (potentialMove.charAt(0) - currentComputerPosition.charAt(0) < 0)
@@ -96,8 +98,8 @@ public class CS4200_P3
 					int potential = getNumericValue(potentialMove.charAt(0)); 
 					int col = Integer.parseInt(String.valueOf(currentComputerPosition.charAt(1))); 
 					for(int i = potential; i < curr; i++) {
-						if (isoBoard[i][col] != '-') {
-							System.out.println("Computer north not valid");
+						if (isoBoard[i][col] == '#' || isoBoard[i][col] == 'O') {
+							//System.out.println("Computer north not valid");
 							return false;
 						}
 					}
@@ -109,12 +111,98 @@ public class CS4200_P3
 					int potential = getNumericValue(potentialMove.charAt(0)); 
 					int col = Integer.parseInt(String.valueOf(currentComputerPosition.charAt(1))); 
 					for(int i = curr; i < potential; i++) {
-						if (isoBoard[i][col] != '-') {
-							System.out.println("Computer south not valid");
+						if (isoBoard[i][col] == '#' || isoBoard[i][col] == 'O') {
+							//System.out.println("Computer south not valid");
 							return false;
 						}
 					}
 					
+				}
+			} else {
+				// COMPUTER DIAGONAL
+				// DOWN LEFT **** WORKS
+				// -> row increase col decrease
+				if (potentialMove.charAt(0) - currentComputerPosition.charAt(0) > 0 && potentialMove.charAt(1) - currentComputerPosition.charAt(1) < 0) {
+					int currx = getNumericValue(currentComputerPosition.charAt(0));
+					int potentialx = getNumericValue(potentialMove.charAt(0));
+					int curry = Integer.parseInt(String.valueOf(currentComputerPosition.charAt(1)));
+					int potentialy = Integer.parseInt(String.valueOf(potentialMove.charAt(1)));
+
+					for (int row = currx; row <= potentialx; row++) {
+						for(int col = potentialy; col <= potentialy; col++) {
+							if (isoBoard[row][col] == '#' || isoBoard[row][col] == 'O') {
+									//System.out.println("Computer diagonal not valid");
+									System.out.println("Row:" + row + " Col:" + col);
+									return false;
+								}
+						}
+					}
+				}
+
+				// DOWN RIGHT **** WORKS
+				// -> row increase col increase
+				if (potentialMove.charAt(0) - currentComputerPosition.charAt(0) > 0 && potentialMove.charAt(1) - currentComputerPosition.charAt(1) > 0) {
+
+					int currx = getNumericValue(currentComputerPosition.charAt(0));
+					int potentialx = getNumericValue(potentialMove.charAt(0));
+					int curry = Integer.parseInt(String.valueOf(currentComputerPosition.charAt(1)));
+					int potentialy = Integer.parseInt(String.valueOf(potentialMove.charAt(1)));
+
+					for (int row = currx; row <= potentialx; row++) {
+						for(int col = curry; col <= potentialy; col++) {
+							if (row == col) {
+								if (isoBoard[row][col] == '#' || isoBoard[row][col] == 'O' ) {
+									//System.out.println("Computer diagonal not valid");
+									//System.out.println("Row:" + row + " Col:" + col);
+									return false;
+								}
+							}
+							
+						}
+					}
+				}
+
+				// UP LEFT **** WORKS
+				// -> start at potential iterate down to curr
+				if (potentialMove.charAt(0) - currentComputerPosition.charAt(0) < 0 && potentialMove.charAt(1) - currentComputerPosition.charAt(1) < 0) {
+					
+					int currx = getNumericValue(currentComputerPosition.charAt(0));
+					int potentialx = getNumericValue(potentialMove.charAt(0));
+					int curry = Integer.parseInt(String.valueOf(currentComputerPosition.charAt(1)));
+					int potentialy = Integer.parseInt(String.valueOf(potentialMove.charAt(1)));
+
+					for (int row = potentialx; row <= currx; row++) {
+						for(int col = potentialy; col <= curry; col++) {
+
+							if (row == col) {
+								if (isoBoard[row][col] == '#' || isoBoard[row][col] == 'O' ) {
+										//System.out.println("Computer diagonal not valid");
+										System.out.println("Row:" + row + " Col:" + col);
+										return false;
+								}
+							}
+						}
+					}
+				}
+
+				// UP RIGHT **** WORKS
+				// -> start at potential x iterate backwards to curr x
+				if (potentialMove.charAt(0) - currentComputerPosition.charAt(0) < 0 && potentialMove.charAt(1) - currentComputerPosition.charAt(1) > 0) {
+					
+					int currx = getNumericValue(currentComputerPosition.charAt(0));
+					int potentialx = getNumericValue(potentialMove.charAt(0));
+					int curry = Integer.parseInt(String.valueOf(currentComputerPosition.charAt(1)));
+					int potentialy = Integer.parseInt(String.valueOf(potentialMove.charAt(1)));
+
+					for (int row = currx; row >= potentialx; row--) {
+						for(int col = currx; col <= potentialy; col++) {
+							if (isoBoard[row][col] == '#' || isoBoard[row][col] == 'O') {
+									//System.out.println("Computer diagonal not valid");
+									System.out.println("Row:" + row + " Col:" + col);
+									return false;
+								}
+						}
+					}
 				}
 			}
 		}
@@ -135,8 +223,8 @@ public class CS4200_P3
 					int potential=Integer.parseInt(String.valueOf(potentialMove.charAt(1))); 
 					int row = getNumericValue(path.charAt(0)); 
 					for(int i = potential; i < curr; i++) {
-						if (isoBoard[row][i] != '-') {
-							System.out.println("Opponent west not valid");
+						if (isoBoard[row][i] == '#' || isoBoard[row][i] == 'X') {
+							//System.out.println("Opponent west not valid");
 							return false;
 						}
 					}
@@ -147,8 +235,8 @@ public class CS4200_P3
 					int potential=Integer.parseInt(String.valueOf(potentialMove.charAt(1))); 
 					int row = getNumericValue(path.charAt(0)); 
 					for(int i = curr; i < potential; i++) {
-						if (isoBoard[row][i] != '-') {
-							System.out.println("Opponent east not valid");
+						if (isoBoard[row][i] == '#' || isoBoard[row][i] == 'X') {
+							//System.out.println("Opponent east not valid");
 							return false;
 						}
 					}
@@ -157,7 +245,7 @@ public class CS4200_P3
 			}
 
 			// OPPONENT VERTICAL
-			if (path.charAt(1) == potentialMove.charAt(1)) 
+			 else if (path.charAt(1) == potentialMove.charAt(1)) 
 			{
 				// check to see if you're jumping north over a #
 				if (potentialMove.charAt(0) - currentOpponentPosition.charAt(0) < 0)
@@ -166,23 +254,111 @@ public class CS4200_P3
 					int potential = getNumericValue(potentialMove.charAt(0)); 
 					int col = Integer.parseInt(String.valueOf(currentOpponentPosition.charAt(1))); 
 					for(int i = potential; i < curr; i++) {
-						if (isoBoard[i][col] != '-') {
-							System.out.println("Opponent north not valid");
+						if (isoBoard[i][col] == '#' || isoBoard[i][col] == 'X') {
+							//System.out.println("Opponent north not valid");
 							return false;
 						}
 					}
 					
 				}
 				// check to see if you're jumping south over a #
+				// DOES NOT WORK
 				if (potentialMove.charAt(0) - currentOpponentPosition.charAt(0) > 0)
 				{
 					int curr = getNumericValue(currentOpponentPosition.charAt(0)); 
 					int potential = getNumericValue(potentialMove.charAt(0)); 
 					int col = Integer.parseInt(String.valueOf(currentOpponentPosition.charAt(1))); 
 					for(int i = curr; i < potential; i++) {
-						if (isoBoard[i][col] != '-') {
-							System.out.println("Opponent south not valid");
+						if (isoBoard[i][col] == '#' || isoBoard[i][col] == 'X') {
+							//System.out.println("Opponent south not valid");
 							return false;
+						}
+					}
+				}
+			} else {
+
+				// Opponent Diagonal
+
+				// DOWN LEFT **** does not work
+				// -> row increase col decrease
+				if (potentialMove.charAt(0) - currentOpponentPosition.charAt(0) > 0 && potentialMove.charAt(1) - currentOpponentPosition.charAt(1) < 0) {
+					int currx = getNumericValue(currentOpponentPosition.charAt(0));
+					int potentialx = getNumericValue(potentialMove.charAt(0));
+					int curry = Integer.parseInt(String.valueOf(currentOpponentPosition.charAt(1)));
+					int potentialy = Integer.parseInt(String.valueOf(potentialMove.charAt(1)));
+
+					for (int row = potentialx; row >= currx; row--) {
+						for(int col = potentialy; col <= curry; col++) {
+							if (isoBoard[row][col] == '#' || isoBoard[row][col] == 'X' ) {
+									//System.out.println("Computer diagonal not valid");
+									System.out.println("Row:" + row + " Col:" + col);
+									return false;
+								}
+						}
+					}
+				}
+
+				// DOWN RIGHT **** WORKS
+				// -> row increase col increase
+				if (potentialMove.charAt(0) - currentOpponentPosition.charAt(0) > 0 && potentialMove.charAt(1) - currentOpponentPosition.charAt(1) > 0) {
+
+					int currx = getNumericValue(currentOpponentPosition.charAt(0));
+					int potentialx = getNumericValue(potentialMove.charAt(0));
+					int curry = Integer.parseInt(String.valueOf(currentOpponentPosition.charAt(1)));
+					int potentialy = Integer.parseInt(String.valueOf(potentialMove.charAt(1)));
+
+					for (int row = currx; row <= potentialx; row++) {
+						for(int col = curry; col <= potentialy; col++) {
+							if (row == col) 
+							{ 
+								if (isoBoard[row][col] == '#' || isoBoard[row][col] == 'X') {
+									//System.out.println("Computer diagonal not valid");
+									//System.out.println("Row:" + row + " Col:" + col);
+									return false;
+								}
+							}
+						}
+					}
+				}
+
+				// UP LEFT **** WORKS
+				// -> start at potential iterate down to curr
+				if (potentialMove.charAt(0) - currentOpponentPosition.charAt(0) < 0 && potentialMove.charAt(1) - currentOpponentPosition.charAt(1) < 0) {
+					
+					int currx = getNumericValue(currentOpponentPosition.charAt(0));
+					int potentialx = getNumericValue(potentialMove.charAt(0));
+					int curry = Integer.parseInt(String.valueOf(currentOpponentPosition.charAt(1)));
+					int potentialy = Integer.parseInt(String.valueOf(potentialMove.charAt(1)));
+
+					for (int row = potentialx; row <= currx; row++) {
+						for(int col = potentialy; col <= curry; col++) {
+							if(row == col) {
+								if  (isoBoard[row][col] == '#' || isoBoard[row][col] == 'X') {
+									//System.out.println("Computer diagonal not valid");
+									System.out.println("Row:" + row + " Col:" + col);
+									return false;
+								}
+							}
+						}
+					}
+				}
+
+				// UP RIGHT **** WORKS
+				// -> start at potential x iterate backwards to curr x
+				if (potentialMove.charAt(0) - currentOpponentPosition.charAt(0) < 0 && potentialMove.charAt(1) - currentOpponentPosition.charAt(1) > 0) {
+					
+					int currx = getNumericValue(currentOpponentPosition.charAt(0));
+					int potentialx = getNumericValue(potentialMove.charAt(0));
+					int curry = Integer.parseInt(String.valueOf(currentOpponentPosition.charAt(1)));
+					int potentialy = Integer.parseInt(String.valueOf(potentialMove.charAt(1)));
+
+					for (int row = currx; row >= potentialx; row--) {
+						for(int col = currx; col <= potentialy; col++) {
+							if  (isoBoard[row][col] == '#' || isoBoard[row][col] == 'X') {
+									//System.out.println("Computer diagonal not valid");
+									System.out.println("Row:" + row + " Col:" + col);
+									return false;
+							}
 						}
 					}
 				}
@@ -196,7 +372,7 @@ public class CS4200_P3
 		opponentTurn = true;
 		System.out.println("\nEnter opponent's move: ");
 		sc = new Scanner(System.in);
-		String oMove = sc.nextLine();
+		String oMove = sc.next();
 		boolean valid = isValidOpponentMove(oMove);
 
 		while (searchInArray(oMove)) 
@@ -415,6 +591,150 @@ public class CS4200_P3
 		}
 	}
 
+	// function MinMax-Decision() return an action
+    // v is the Max value in state
+    // function to check if this stage X Won
+    // function to check if this stage C won
+    //Min Nodes - computer move , X
+    //Max nodes - player move, O
 
+    public static int checkWinner(char[][] isoBoard) 
+    { 
+        for (int row = 0; row<7; row++) 
+        { 
+            if (isoBoard[row][0]==isoBoard[row][1] &&
+                isoBoard[row][1]==isoBoard[row][2] &&
+                isoBoard[row][2]==isoBoard[row][3] &&
+                isoBoard[row][3]==isoBoard[row][4] &&
+                isoBoard[row][4]==isoBoard[row][5] &&
+                isoBoard[row][5]==isoBoard[row][6] &&
+                isoBoard[row][6]==isoBoard[row][7] )
+            { 
+                if (isoBoard[row][0]=='X') 
+                   return +1; 
+                else if (isoBoard[row][0]=='O') 
+                   return -1; 
+            } 
+        } 
+        
+        for (int col = 0; col<7; col++) 
+        { 
+            if (isoBoard[0][col]==isoBoard[1][col] && 
+                isoBoard[1][col]==isoBoard[2][col] &&
+                isoBoard[2][col]==isoBoard[3][col] &&
+                isoBoard[3][col]==isoBoard[4][col] &&
+                isoBoard[4][col]==isoBoard[5][col] &&
+                isoBoard[5][col]==isoBoard[6][col] &&
+                isoBoard[6][col]==isoBoard[7][col] ) 
+            { 
+                if (isoBoard[0][col]=='X') 
+                    return +1; 
+                else if (isoBoard[0][col]=='O') 
+                    return -1; 
+            } 
+        } 
+        
+        int check=0, dcheck = 0;
+        for(int i=0; i < 7 ; i++){
+            if (isoBoard[0][0]==isoBoard[i][i])
+            { 
+                 check++;
+            } 
+        }
+            if (isoBoard[0][7]==isoBoard[1][6] && 
+                isoBoard[0][7]==isoBoard[2][5] &&
+                isoBoard[0][7]==isoBoard[3][4] &&
+                isoBoard[0][7]==isoBoard[4][3] &&
+                isoBoard[0][7]==isoBoard[5][2] &&
+                isoBoard[0][7]==isoBoard[6][1] &&
+                isoBoard[0][7]==isoBoard[7][0] )
+            { 
+                dcheck = 7;
+              }
+         
+        
+        if ((check==7 && isoBoard[0][0]=='X')|| isoBoard[0][7] == 'X' && dcheck == 7) 
+            return +1; 
+        else if (check == 7 && isoBoard[0][0]=='O' || isoBoard[0][7] == 'O' && dcheck == 7) 
+            return -1;
+        
+        return 0; 
+    }
+
+    
+    
+    
+   
+    
+    public List<place> emptyCell(char[][] isoBoard){
+        emptyCells = new ArrayList<>();
+        for(int i = 0; i < 7; i++){
+            for( int j = 0;j<7;j++){
+                if(isoBoard[i][j] == '-')
+                    emptyCells.add(new place(i,j));
+            }
+        }
+        return emptyCells;
+    }
+    
+    
+    // ALpha Beta Prunning
+    public static int alphaBeta(char[][] state){
+       int action =0;
+       int negaInfi = Integer.MIN_VALUE;
+       int posiInfi = Integer.MAX_VALUE;
+       int v = Max_Value(state,negaInfi,posiInfi);
+       return action; // Sucessors(state) with value v
+    }
+    
+    public static int Max_Value (char[][] isoBoard, int alpha, int beta) {
+        try{
+            if(emptyCells.isEmpty()) 
+                 return Utility(isoBoard);
+        }catch(Exception e){
+        }
+         int v = Integer.MIN_VALUE; // negative infinity
+         for (int a = 0; a < successors(isoBoard); a++){
+             v = Math.max(v, Min_Value(isoBoard,alpha,beta));
+             if(v >= beta)  return v;
+             beta = Math.max(beta, v)  ;             
+         }
+         return v;
+    }
+    
+    // function Min_value(state,alpha, beta) return Utility
+    // if termina_test(state) return utillity;
+     public static int Min_Value (char[][] isoBoard, int alpha, int beta) {
+         
+         if(emptyCells.isEmpty())
+             return Utility(isoBoard);
+         int v = Integer.MAX_VALUE; // positive infinity
+         for (int a = 0; a < successors(isoBoard); a++){
+             v = Math.min(v, Max_Value(isoBoard,alpha,beta));
+             if(v <= alpha) return v;
+             beta = Math.min(beta, v)   ;            
+         }
+         return v;
+     }
+     
+     public static int Utility(char[][] isoBoard){
+         int u = 0;
+         u = checkWinner(isoBoard);
+         return u;
+     }
+     
+     public static int successors(char[][] isoBoard){
+         // QUEEN MOVE 
+         //list
+         return 0;
+     }
+}
+
+class place{
+    int row, col;
+    public place(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
 
 }
